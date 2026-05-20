@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SF Next Theme Extractor</title>
+<style>
+:root {
+  --bg:#0a0a0a;--surface:#111;--surface2:#1a1a1a;--surface3:#222;
+  --border:#2a2a2a;--border2:#333;--border3:#444;
+  --text:#f0f0f0;--text2:#999;--text3:#555;--text4:#2e2e2e;
+  --accent:#e8ff00;--accent-dim:rgba(232,255,0,0.08);--accent-border:rgba(232,255,0,0.22);
+  --red:#ff4444;--red-dim:rgba(255,68,68,0.1);--red-border:rgba(255,68,68,0.25);
+  --green:#22c55e;--green-dim:rgba(34,197,94,0.08);--green-border:rgba(34,197,94,0.25);
+  --blue:#60a5fa;--blue-dim:rgba(96,165,250,0.08);--blue-border:rgba(96,165,250,0.2);
+  --purple:#a78bfa;--purple-dim:rgba(167,139,250,0.08);--purple-border:rgba(167,139,250,0.2);
+  --orange:#fb923c;--orange-dim:rgba(251,146,60,0.08);--orange-border:rgba(251,146,60,0.2);
+  --r:8px;--r-lg:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,-apple-system,sans-serif;font-size:14px;line-height:1.6;min-height:100vh;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+.hidden{display:none!important;}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 20px;border-radius:var(--r);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:inherit;outline:none;}
+.btn-primary{background:var(--accent);color:#000;width:100%;}
+.btn-primary:hover:not(:disabled){background:#d4e800;}
+.btn-primary:active:not(:disabled){transform:scale(.98);}
+.btn-primary:disabled{opacity:.35;cursor:not-allowed;}
+.btn-ghost{background:var(--surface2);color:var(--text2);border:1px solid var(--border2);}
+.btn-ghost:hover:not(:disabled){background:var(--surface3);color:var(--text);}
+.btn-ghost:disabled{opacity:.35;cursor:not-allowed;}
+input[type=text],input[type=url],input[type=password]{width:100%;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-size:13px;padding:10px 12px;outline:none;transition:border-color .15s;font-family:inherit;}
+input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);}
+input::placeholder{color:var(--text3);}
+.divider{border:none;border-top:1px solid var(--border);}
+.label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:.6rem;display:block;}
+.tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 9px;border-radius:20px;letter-spacing:.04em;font-weight:600;}
+.tag-accent{background:var(--accent-dim);border:1px solid var(--accent-border);color:var(--accent);}
+.tag-green{background:var(--green-dim);border:1px solid var(--green-border);color:var(--green);}
+.tag-blue{background:var(--blue-dim);border:1px solid var(--blue-border);color:var(--blue);}
+.tag-purple{background:var(--purple-dim);border:1px solid var(--purple-border);color:var(--purple);}
+.tag-orange{background:var(--orange-dim);border:1px solid var(--orange-border);color:var(--orange);}
+.alert{font-size:12px;padding:10px 14px;border-radius:var(--r);line-height:1.5;}
+.alert-red{background:var(--red-dim);border:1px solid var(--red-border);color:var(--red);}
+
+header{border-bottom:1px solid var(--border);padding:0 1.5rem;display:flex;align-items:center;gap:.75rem;height:52px;position:sticky;top:0;background:var(--bg);z-index:20;}
+.logo{font-size:12px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--text2);}
+.logo span{color:var(--accent);}
+.hdr-right{margin-left:auto;display:flex;align-items:center;gap:8px;}
+#key-status-bar{display:flex;align-items:center;gap:8px;font-size:12px;}
+#key-masked{font-family:monospace;font-size:11px;color:var(--text3);}
+
+/* Screen 1 */
+#screen-key{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 52px);padding:2rem;}
+.key-card{width:100%;max-width:500px;background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-lg);padding:2rem;display:flex;flex-direction:column;gap:1.5rem;}
+.key-card h1{font-size:20px;font-weight:600;}
+.key-card .sub{font-size:13px;color:var(--text2);}
+.provider-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.pcard{border:1px solid var(--border2);border-radius:var(--r);padding:12px 14px;cursor:pointer;transition:all .15s;background:var(--surface2);display:flex;flex-direction:column;gap:5px;position:relative;}
+.pcard:hover{border-color:var(--border3);background:var(--surface3);}
+.pcard.selected{border-color:var(--accent);background:var(--accent-dim);}
+.pcard .pname{font-size:13px;font-weight:600;color:var(--text);}
+.pcard .pmodel{font-size:11px;color:var(--text3);}
+.pcard.selected .pmodel{color:rgba(232,255,0,.55);}
+.pcard .pfree{position:absolute;top:8px;right:8px;font-size:9px;padding:1px 5px;border-radius:4px;font-weight:700;letter-spacing:.05em;}
+.pfree-yes{background:var(--green-dim);color:var(--green);border:1px solid var(--green-border);}
+.pfree-partial{background:var(--orange-dim);color:var(--orange);border:1px solid var(--orange-border);}
+.proxy-note{font-size:11px;color:var(--text3);padding:8px 12px;background:var(--surface2);border:1px solid var(--border2);border-radius:var(--r);line-height:1.6;}
+.proxy-note strong{color:var(--text2);}
+.key-input-wrap{position:relative;}
+.key-input-wrap input{padding-right:44px;}
+.eye-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);cursor:pointer;padding:4px;line-height:0;}
+.eye-btn:hover{color:var(--text2);}
+.key-hint{font-size:11px;color:var(--text3);}
+.key-hint a{color:var(--text2);text-decoration:underline;text-underline-offset:2px;}
+.key-hint a:hover{color:var(--accent);}
+#validating{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);}
+.spinner{width:14px;height:14px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.privacy-note{font-size:11px;color:var(--text3);text-align:center;line-height:1.6;}
+.privacy-note code{color:var(--text2);}
+
+/* Screen 2 */
+#screen-app{display:none;height:calc(100vh - 52px);overflow:hidden;}
+.app-layout{display:grid;grid-template-columns:360px 1fr;height:100%;}
+.panel-left{border-right:1px solid var(--border);padding:1.5rem;overflow-y:auto;display:flex;flex-direction:column;gap:1.25rem;}
+.panel-right{display:flex;flex-direction:column;overflow:hidden;}
+.scaffold-drop{border:1px dashed var(--border2);border-radius:var(--r);padding:1.25rem;text-align:center;cursor:pointer;transition:all .15s;position:relative;}
+.scaffold-drop:hover,.scaffold-drop.drag-over{border-color:var(--accent);background:var(--accent-dim);}
+.scaffold-drop input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.scaffold-drop .di{font-size:20px;margin-bottom:4px;}
+.scaffold-drop .dt{font-size:11px;color:var(--text2);}
+.scaffold-drop .dt strong{color:var(--text);}
+.scaffold-loaded{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--green-dim);border:1px solid var(--green-border);border-radius:var(--r);font-size:12px;color:var(--green);}
+.scaffold-loaded .fn{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.scaffold-loaded button{background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;}
+.scaffold-loaded button:hover{color:var(--red);}
+.steps{display:flex;flex-direction:column;gap:2px;}
+.step{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--text4);padding:5px 0;transition:color .2s;}
+.step.active{color:var(--text2);}.step.done{color:var(--green);}.step.error{color:var(--red);}
+.step-dot{width:6px;height:6px;border-radius:50%;background:var(--text4);flex-shrink:0;transition:background .2s;}
+.step.active .step-dot{background:var(--accent);animation:pulse 1s infinite;}
+.step.done .step-dot{background:var(--green);}.step.error .step-dot{background:var(--red);}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.25;}}
+.output-toolbar{display:flex;align-items:center;gap:8px;padding:10px 1.25rem;border-bottom:1px solid var(--border);flex-shrink:0;}
+.out-fn{flex:1;font-size:12px;color:var(--text2);font-family:'JetBrains Mono','Fira Code',monospace;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.out-fn span{color:var(--text);}
+.output-area{flex:1;overflow:hidden;position:relative;}
+.output-code{position:absolute;inset:0;overflow-y:auto;padding:1.25rem;}
+pre{font-family:'JetBrains Mono','Fira Code','Courier New',monospace;font-size:11.5px;line-height:1.75;white-space:pre-wrap;word-break:break-word;}
+.ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--text3);pointer-events:none;}
+.ph svg{opacity:.2;}.ph p{font-size:13px;}
+.cc{color:#484848;}.ci{color:#6b9fd4;}.ca{color:#b57dc8;}
+.cp{color:#6dbdda;}.ch{color:#e8955a;}.cr{color:#92c77a;}.cs{color:#92c77a;}
+.toast{position:fixed;bottom:1.25rem;right:1.25rem;padding:9px 15px;border-radius:var(--r);font-size:13px;font-weight:500;z-index:100;animation:toastin .2s ease;transition:opacity .3s;pointer-events:none;}
+.toast.ok{background:var(--green-dim);border:1px solid var(--green-border);color:var(--green);}
+.toast.err{background:var(--red-dim);border:1px solid var(--red-border);color:var(--red);}
+@keyframes toastin{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:700px){
+  .app-layout{grid-template-columns:1fr;grid-template-rows:auto 1fr;}
+  #screen-app{height:auto;overflow:visible;}
+  .panel-right{min-height:55vh;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">SF Next <span>Theme</span> Extractor</div>
+  <div class="hdr-right">
+    <div id="key-status-bar" class="hidden">
+      <span id="key-provider-badge" class="tag"></span>
+      <span id="key-masked"></span>
+      <button class="btn btn-ghost" id="change-key-btn" style="font-size:11px;padding:4px 10px;">Change key</button>
+    </div>
+  </div>
+</header>
+
+<!-- SCREEN 1 -->
+<div id="screen-key">
+  <div class="key-card">
+    <div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <span class="tag tag-accent">BYOK</span>
+        <span style="font-size:11px;color:var(--text3);">Bring Your Own Key — 4 providers</span>
+      </div>
+      <h1>Connect your AI provider</h1>
+      <p class="sub" style="margin-top:4px;">Your key goes directly to the provider — never stored on any server.</p>
+    </div>
+
+    <div>
+      <span class="label">Choose provider</span>
+      <div class="provider-grid">
+        <div class="pcard selected" data-provider="anthropic">
+          <span class="pfree pfree-partial">$5 free</span>
+          <span class="pname">Anthropic</span>
+          <span class="pmodel">claude-sonnet-4 · web search</span>
+        </div>
+        <div class="pcard" data-provider="openai">
+          <span class="pfree pfree-partial">$5 free</span>
+          <span class="pname">OpenAI</span>
+          <span class="pmodel">gpt-4o</span>
+        </div>
+        <div class="pcard" data-provider="mistral">
+          <span class="pfree pfree-yes">FREE</span>
+          <span class="pname">Mistral AI</span>
+          <span class="pmodel">mistral-small · free tier</span>
+        </div>
+        <div class="pcard" data-provider="gemini">
+          <span class="pfree pfree-yes">FREE</span>
+          <span class="pname">Google Gemini</span>
+          <span class="pmodel">gemini-2.0-flash · free tier</span>
+        </div>
+      </div>
+      <div id="anthropic-proxy-note" class="proxy-note" style="margin-top:10px;">
+        ⚡ <strong>Anthropic</strong> calls are routed via a serverless proxy on this host — your key is forwarded directly to Anthropic and never stored.
+      </div>
+      <p style="font-size:11px;color:var(--text3);margin-top:8px;">
+        💡 <strong style="color:var(--text2);">Anthropic</strong> gives the best results (live web search).
+        <strong style="color:var(--text2);">Mistral</strong> &amp; <strong style="color:var(--text2);">Gemini</strong> are 100% free.
+      </p>
+    </div>
+
+    <div>
+      <span class="label">API Key</span>
+      <div class="key-input-wrap">
+        <input type="password" id="key-input" placeholder="Paste your API key here…" autocomplete="off" spellcheck="false">
+        <button class="eye-btn" id="eye-btn" type="button">
+          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
+      <p class="key-hint" id="key-hint" style="margin-top:6px;"></p>
+    </div>
+
+    <div id="validating" class="hidden">
+      <div class="spinner"></div><span>Validating key…</span>
+    </div>
+    <div id="key-error" class="alert alert-red hidden"></div>
+
+    <button class="btn btn-primary" id="key-validate-btn" disabled>
+      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      Validate &amp; Continue
+    </button>
+    <p class="privacy-note">Key saved in <code>localStorage</code> — clears when you clear browser data.</p>
+  </div>
+</div>
+
+<!-- SCREEN 2 -->
+<div id="screen-app">
+  <div class="app-layout">
+    <div class="panel-left">
+      <div>
+        <span class="label">Target website</span>
+        <input type="url" id="url-input" placeholder="https://www.puma.com" autocomplete="off">
+      </div>
+      <div>
+        <span class="label">CSS Scaffold</span>
+        <div id="scaffold-drop" class="scaffold-drop">
+          <input type="file" id="scaffold-file" accept=".css">
+          <div class="di">📄</div>
+          <div class="dt"><strong>Drop theme-sample.css here</strong><br>or click to browse</div>
+        </div>
+        <div id="scaffold-loaded" class="scaffold-loaded hidden">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+          <span class="fn" id="scaffold-fn"></span>
+          <button id="scaffold-clear">✕</button>
+        </div>
+      </div>
+      <hr class="divider">
+      <div>
+        <span class="label">Progress</span>
+        <div class="steps">
+          <div class="step" id="s-read"><div class="step-dot"></div>Reading scaffold structure</div>
+          <div class="step" id="s-search"><div class="step-dot"></div>Searching brand identity</div>
+          <div class="step" id="s-css"><div class="step-dot"></div>Extracting CSS variables &amp; colours</div>
+          <div class="step" id="s-fonts"><div class="step-dot"></div>Identifying typography</div>
+          <div class="step" id="s-header"><div class="step-dot"></div>Analysing header / nav / footer</div>
+          <div class="step" id="s-buttons"><div class="step-dot"></div>Inspecting CTA buttons</div>
+          <div class="step" id="s-gen"><div class="step-dot"></div>Generating theme file</div>
+        </div>
+      </div>
+      <hr class="divider">
+      <button class="btn btn-primary" id="extract-btn" disabled>
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        Extract Theme
+      </button>
+      <div id="extract-error" class="alert alert-red hidden"></div>
+    </div>
+
+    <div class="panel-right">
+      <div class="output-toolbar">
+        <div class="out-fn">Output: <span id="out-fn">—</span></div>
+        <button class="btn btn-ghost" id="copy-btn" disabled style="padding:6px 12px;font-size:12px;">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>Copy
+        </button>
+        <button class="btn btn-ghost" id="dl-btn" disabled style="padding:6px 12px;font-size:12px;">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Download
+        </button>
+        <button class="btn btn-ghost" id="reset-btn" style="padding:6px 12px;font-size:12px;display:none;">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>New
+        </button>
+      </div>
+      <div class="output-area">
+        <div class="ph" id="ph">
+          <svg width="44" height="44" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+          <p>Enter a URL and click Extract Theme</p>
+        </div>
+        <div class="output-code hidden" id="out-wrap">
+          <pre id="css-out"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DEFAULT_SCAFFOLD = `/* ── Base imports — DO NOT CHANGE these lines ─────────────────────────────── */
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+@import '../src/theme/tailwind.css';
+@import '../src/theme/tokens/core.css';
+@import '../src/theme/tokens/status.css';
+@import '../src/theme/tokens/swatch.css';
+@import '../src/theme/tokens/header.css';
+@import '../src/theme/tokens/brand.css';
+@import '../src/theme/tokens/components.css';
+@import '../src/theme/animations.css';
+@import '../src/theme/base.css';
+@import '../src/theme/overrides/sonner.css';
+@import '../src/theme/overrides/navigation.css';
+@import '../src/theme/overrides/store-locator.css';
+
+/* ── [Brand name] — theme overrides ─────────────────────────────────────────
+   Source: https://www.example-brand.com
+   Generated: YYYY-MM-DD
+   ──────────────────────────────────────────────────────────────────────────── */
+
+@theme inline {
+    --font-sans:  "Brand Font Name", Helvetica, Arial, sans-serif;
+    --font-serif: "Brand Font Name", Georgia, serif;
+    --font-mono:  "Courier New", Courier, monospace;
+}
+
+:root {
+    --background: #ffffff;
+    --foreground: #000000;
+    --card: #ffffff;
+    --card-foreground: #000000;
+    --popover: #000000;
+    --popover-foreground: #ffffff;
+    --primary: #000000;
+    --primary-foreground: #ffffff;
+    --secondary: #f8f8f8;
+    --secondary-foreground: #000000;
+    --muted: #f5f5f5;
+    --muted-foreground: #6b6b6b;
+    --accent: #fafafa;
+    --accent-foreground: #000000;
+    --border: rgba(0, 0, 0, 0.08);
+    --border-subtle: #d1d5db;
+    --input: #e8e8e8;
+    --ring: #000000;
+    --header-background: #000000;
+    --header-foreground: #ffffff;
+    --header-border: rgba(255, 255, 255, 0.1);
+    --header-divider: rgba(255, 255, 255, 0.1);
+    --header-menu-background: #000000;
+    --header-menu-foreground: #ffffff;
+    --header-menu-border: rgba(255, 255, 255, 0.1);
+    --header-menu-hover-background: #ffffff;
+    --header-menu-hover-foreground: #000000;
+    --header-menu-active-background: rgba(255, 255, 255, 0.05);
+    --header-menu-icon: rgba(255, 255, 255, 0.7);
+    --header-logo-filter: brightness(0) invert(1);
+    --footer-background: #ffffff;
+    --footer-foreground: #000000;
+    --brand-primary: #000000;
+    --brand-primary-hover: #333333;
+}
+
+[data-testid="header-logo"] img { height: 2rem; }
+@media (min-width: 1024px) { [data-testid="header-logo"] img { height: 2.5rem; } }
+
+[data-slot="button"][data-variant="default"] {
+    border-radius: 0.375rem;
+    background-color: #000000;
+    color: #ffffff;
+    border: none;
+}
+[data-slot="button"][data-variant="default"]:hover:not(:disabled) { background-color: #222222; opacity: 1; }
+[data-slot="button"][data-variant="default"]:active:not(:disabled) { background-color: #111111; }
+
+/* [data-testid="header-search"] {
+    border-radius: 9999px;
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+} */`;
+
+// ── PROVIDER DEFINITIONS ─────────────────────────────────────────────────────
+// Anthropic: routed via /.netlify/functions/anthropic-proxy (same-origin, no CORS)
+// Others: direct browser → API (all have proper CORS headers)
+const PROVIDERS = {
+  anthropic: {
+    label:'Anthropic', tagClass:'tag-accent',
+    placeholder:'sk-ant-api03-…',
+    hint:'Get a key (with $5 credit) at <a href="https://console.anthropic.com/settings/keys" target="_blank">console.anthropic.com</a>',
+    supportsWebSearch: true,
+    validate: async (key) => {
+      const r = await fetch('/.netlify/functions/anthropic-proxy', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':key},
+        body: JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:5,messages:[{role:'user',content:'hi'}]})
+      });
+      if (r.status===401) throw new Error('Invalid key — please check and try again.');
+      if (!r.ok) { const e=await r.json().catch(()=>({})); throw new Error(e?.error?.message||`Error ${r.status}`); }
+    },
+    call: async (key, sys, msgs) => {
+      const body = {model:'claude-sonnet-4-20250514',max_tokens:4096,system:sys,messages:msgs,
+        tools:[{type:'web_search_20250305',name:'web_search'}]};
+      const r = await fetch('/.netlify/functions/anthropic-proxy', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':key},
+        body: JSON.stringify(body)
+      });
+      if (!r.ok) { const e=await r.json().catch(()=>({})); throw new Error(e?.error?.message||`API error ${r.status}`); }
+      return r.json();
+    },
+    isMultiTurn: true
+  },
+
+  openai: {
+    label:'OpenAI', tagClass:'tag-blue',
+    placeholder:'sk-proj-…',
+    hint:'Get a key (with $5 credit) at <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a>',
+    supportsWebSearch: false,
+    validate: async (key) => {
+      const r = await fetch('https://api.openai.com/v1/chat/completions', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
+        body: JSON.stringify({model:'gpt-4o-mini',max_tokens:5,messages:[{role:'user',content:'hi'}]})
+      });
+      if (r.status===401) throw new Error('Invalid key — please check and try again.');
+      if (!r.ok) { const e=await r.json().catch(()=>({})); throw new Error(e?.error?.message||`Error ${r.status}`); }
+    },
+    call: async (key, sys, msgs) => {
+      const oaiMsgs=[{role:'system',content:sys},...msgs.map(m=>({
+        role:m.role,
+        content:typeof m.content==='string'?m.content:(m.content.filter(b=>b.type==='text').map(b=>b.text).join('\n')||'ok')
+      }))];
+      const r = await fetch('https://api.openai.com/v1/chat/completions', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
+        body: JSON.stringify({model:'gpt-4o',max_tokens:4096,temperature:0.1,messages:oaiMsgs})
+      });
+      if (!r.ok) { const e=await r.json().catch(()=>({})); throw new Error(e?.error?.message||`API error ${r.status}`); }
+      const d=await r.json();
+      return {stop_reason:'end_turn',content:[{type:'text',text:d.choices[0]?.message?.content||''}]};
+    },
+    isMultiTurn: false
+  },
+
+  mistral: {
+    label:'Mistral AI', tagClass:'tag-orange',
+    placeholder:'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    hint:'Get a free key at <a href="https://console.mistral.ai/api-keys" target="_blank">console.mistral.ai</a> — no credit card needed',
+    supportsWebSearch: false,
+    _model: null,
+    _models: ['open-mistral-nemo','mistral-small-latest','open-mistral-7b','mistral-tiny'],
+    validate: async (key) => {
+      for (const model of PROVIDERS.mistral._models) {
+        const r = await fetch('https://api.mistral.ai/v1/chat/completions', {
+          method:'POST',
+          headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
+          body: JSON.stringify({model,max_tokens:5,messages:[{role:'user',content:'hi'}]})
+        });
+        if (r.status===401||r.status===403) throw new Error('Invalid key — please check and try again.');
+        if (r.status===429) continue;
+        if (r.ok) {
+          PROVIDERS.mistral._model=model;
+          const el=document.querySelector('[data-provider="mistral"] .pmodel');
+          if(el) el.textContent=model+' · connected';
+          return;
+        }
+        const e=await r.json().catch(()=>({}));
+        throw new Error(e?.message||`Error ${r.status}`);
+      }
+      throw new Error('Mistral free tier is at capacity — try again in a few minutes or switch to Gemini.');
+    },
+    call: async (key, sys, msgs) => {
+      const model=PROVIDERS.mistral._model||'open-mistral-nemo';
+      const oaiMsgs=[{role:'system',content:sys},...msgs.map(m=>({
+        role:m.role,
+        content:typeof m.content==='string'?m.content:(m.content.filter(b=>b.type==='text').map(b=>b.text).join('\n')||'ok')
+      }))];
+      const r = await fetch('https://api.mistral.ai/v1/chat/completions', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
+        body: JSON.stringify({model,max_tokens:4096,temperature:0.1,messages:oaiMsgs})
+      });
+      if (!r.ok) { const e=await r.json().catch(()=>({})); throw new Error(e?.message||`API error ${r.status}`); }
+      const d=await r.json();
+      return {stop_reason:'end_turn',content:[{type:'text',text:d.choices[0]?.message?.content||''}]};
+    },
+    isMultiTurn: false
+  },
+
+  gemini: {
+    label:'Google Gemini', tagClass:'tag-purple',
+    placeholder:'AIzaSy…',
+    hint:'Get a free key at <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a> — no credit card needed',
+    supportsWebSearch: false,
+    validate: async (key) => {
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({contents:[{parts:[{text:'hi'}]}]})
+      });
+      if (r.status===400||r.status===403) throw new Error('Invalid key — please check and try again.');
+      if (!r.ok) { const e=await r.json().catch(()=>({})); throw new Error(e?.error?.message||`Error ${r.status}`); }
+    },
+    call: async (key, sys, msgs) => {
+      const contents=msgs.map(m=>({
+        role:m.role==='assistant'?'model':'user',
+        parts:[{text:typeof m.content==='string'?m.content:(m.content.filter(b=>b.type==='text').map(b=>b.text).join('\n')||'ok')}]
+      }));
+      const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({system_instruction:{parts:[{text:sys}]},contents,generationConfig:{maxOutputTokens:4096,temperature:0.1}})
+      });
+      if (!r.ok) { const e=await r.json().catch(()=>({})); throw new Error(e?.error?.message||`API error ${r.status}`); }
+      const d=await r.json();
+      const text=d.candidates?.[0]?.content?.parts?.map(p=>p.text).join('')||'';
+      return {stop_reason:'end_turn',content:[{type:'text',text}]};
+    },
+    isMultiTurn: false
+  }
+};
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+const SK='sfnext_key', SP='sfnext_prov';
+let provider=localStorage.getItem(SP)||'anthropic';
+let apiKey=localStorage.getItem(SK)||'';
+let scaffoldCSS=DEFAULT_SCAFFOLD;
+let outputCSS=null, outputFn=null;
+
+// ── DOM ──────────────────────────────────────────────────────────────────────
+const $=id=>document.getElementById(id);
+const screenKey=$('screen-key'), screenApp=$('screen-app');
+const keyInput=$('key-input'), eyeBtn=$('eye-btn'), keyHint=$('key-hint');
+const keyValidBtn=$('key-validate-btn'), keyError=$('key-error'), validating=$('validating');
+const keyStatusBar=$('key-status-bar'), keyProvBadge=$('key-provider-badge'), keyMasked=$('key-masked');
+const changeKeyBtn=$('change-key-btn');
+const urlInput=$('url-input');
+const scaffoldDrop=$('scaffold-drop'), scaffoldFileEl=$('scaffold-file');
+const scaffoldLoadedEl=$('scaffold-loaded'), scaffoldFnEl=$('scaffold-fn'), scaffoldClearBtn=$('scaffold-clear');
+const extractBtn=$('extract-btn'), extractError=$('extract-error');
+const copyBtn=$('copy-btn'), dlBtn=$('dl-btn'), resetBtn=$('reset-btn');
+const outFnEl=$('out-fn'), ph=$('ph'), outWrap=$('out-wrap'), cssOut=$('css-out');
+const proxyNote=$('anthropic-proxy-note');
+const ss={read:$('s-read'),search:$('s-search'),css:$('s-css'),fonts:$('s-fonts'),header:$('s-header'),buttons:$('s-buttons'),gen:$('s-gen')};
+
+// ── SCREEN 1 ─────────────────────────────────────────────────────────────────
+function selectProvider(p) {
+  provider=p;
+  document.querySelectorAll('.pcard').forEach(el=>el.classList.toggle('selected',el.dataset.provider===p));
+  keyHint.innerHTML=PROVIDERS[p].hint;
+  keyInput.placeholder=PROVIDERS[p].placeholder;
+  keyError.classList.add('hidden');
+  // Show proxy note only for Anthropic
+  proxyNote.classList.toggle('hidden', p!=='anthropic');
+}
+
+document.querySelectorAll('.pcard').forEach(el=>el.addEventListener('click',()=>{
+  selectProvider(el.dataset.provider); keyInput.value=''; updateValidateBtn();
+}));
+
+keyInput.addEventListener('input',()=>{ keyError.classList.add('hidden'); updateValidateBtn(); });
+keyInput.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!keyValidBtn.disabled) doValidate(); });
+function updateValidateBtn(){ keyValidBtn.disabled=keyInput.value.trim().length<8; }
+
+eyeBtn.addEventListener('click',()=>{
+  const show=keyInput.type==='text';
+  keyInput.type=show?'password':'text';
+  eyeBtn.innerHTML=show
+    ?`<svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`
+    :`<svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>`;
+});
+
+keyValidBtn.addEventListener('click', doValidate);
+
+async function doValidate() {
+  const key=keyInput.value.trim(); if(!key) return;
+  keyError.classList.add('hidden');
+  validating.classList.remove('hidden');
+  keyValidBtn.disabled=true;
+  keyValidBtn.textContent='Validating…';
+  try {
+    await PROVIDERS[provider].validate(key);
+    apiKey=key;
+    localStorage.setItem(SK,key); localStorage.setItem(SP,provider);
+    goToApp();
+  } catch(err) {
+    keyError.textContent=err.message; keyError.classList.remove('hidden');
+  } finally {
+    validating.classList.add('hidden');
+    keyValidBtn.innerHTML=`<svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> Validate &amp; Continue`;
+    updateValidateBtn();
+  }
+}
+
+function goToApp() {
+  screenKey.style.display='none'; screenApp.style.display='block';
+  keyStatusBar.classList.remove('hidden');
+  keyProvBadge.textContent=PROVIDERS[provider].label;
+  keyProvBadge.className='tag '+PROVIDERS[provider].tagClass;
+  keyMasked.textContent=apiKey.slice(0,7)+'••••'+apiKey.slice(-4);
+}
+
+changeKeyBtn.addEventListener('click',()=>{
+  screenApp.style.display='none'; screenKey.style.display='flex';
+  keyStatusBar.classList.add('hidden');
+  keyInput.value=apiKey; updateValidateBtn(); keyError.classList.add('hidden');
+  selectProvider(provider);
+});
+
+// ── SCREEN 2 ─────────────────────────────────────────────────────────────────
+urlInput.addEventListener('input',()=>{ extractBtn.disabled=!urlInput.value.trim(); });
+urlInput.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!extractBtn.disabled) runExtraction(); });
+
+function loadScaffold(file) {
+  if(!file||!file.name.endsWith('.css')) return;
+  const r=new FileReader();
+  r.onload=ev=>{ scaffoldCSS=ev.target.result; scaffoldFnEl.textContent=file.name; scaffoldLoadedEl.classList.remove('hidden'); scaffoldDrop.classList.add('hidden'); };
+  r.readAsText(file);
+}
+scaffoldFileEl.addEventListener('change',e=>loadScaffold(e.target.files[0]));
+scaffoldDrop.addEventListener('dragover',e=>{e.preventDefault();scaffoldDrop.classList.add('drag-over');});
+scaffoldDrop.addEventListener('dragleave',()=>scaffoldDrop.classList.remove('drag-over'));
+scaffoldDrop.addEventListener('drop',e=>{e.preventDefault();scaffoldDrop.classList.remove('drag-over');loadScaffold(e.dataTransfer.files[0]);});
+scaffoldClearBtn.addEventListener('click',()=>{ scaffoldCSS=DEFAULT_SCAFFOLD; scaffoldFileEl.value=''; scaffoldLoadedEl.classList.add('hidden'); scaffoldDrop.classList.remove('hidden'); });
+
+function resetSteps(){ Object.values(ss).forEach(el=>el.className='step'); }
+function setStep(k,s){ if(ss[k]) ss[k].className='step '+s; }
+
+extractBtn.addEventListener('click', runExtraction);
+resetBtn.addEventListener('click',()=>{
+  outputCSS=null; outputFn=null; cssOut.innerHTML='';
+  outWrap.classList.add('hidden'); ph.classList.remove('hidden');
+  outFnEl.textContent='—'; copyBtn.disabled=true; dlBtn.disabled=true;
+  resetBtn.style.display='none'; resetSteps(); extractError.classList.add('hidden');
+});
+
+async function runExtraction() {
+  const url=urlInput.value.trim(); if(!url) return;
+  resetSteps(); extractError.classList.add('hidden');
+  extractBtn.disabled=true; copyBtn.disabled=true; dlBtn.disabled=true; resetBtn.style.display='none';
+  ph.classList.add('hidden'); outWrap.classList.remove('hidden');
+  cssOut.innerHTML='<span style="color:var(--text3)">Extracting — please wait ~15 seconds…</span>';
+  outFnEl.textContent='…';
+
+  const today=new Date().toISOString().split('T')[0];
+  const cfg=PROVIDERS[provider];
+
+  const SYS=`You are an expert Salesforce Commerce Cloud / Salesforce Next theme extraction engine.
+Given a target website URL and a CSS scaffold, produce a complete production-ready theme CSS file.
+
+RULES
+- Never hallucinate or invent values.
+- Never change base @import lines, rename tokens, reorder sections, or remove comment blocks.
+- Output ONLY raw CSS — no markdown fences, no prose.
+- First line must be: /* filename: theme-brandname.css */
+
+SECTION ORDER (preserve exactly)
+1. Base imports (unchanged)
+2. Brand header comment (brand name, URL, date ${today})
+3. @theme inline fonts
+4. :root colour tokens
+5. Logo size overrides
+6. Primary CTA button overrides
+7. Search bar override (commented out unless clearly needed)
+
+EXTRACTION TARGETS
+Fonts, page bg/fg, card/popover, primary/secondary/muted/accent, borders, inputs, ring, complete header tokens, footer, brand palette, logo heights, CTA button shape+colours, search bar if distinct.
+For uncertain values keep the scaffold default and add a /* TODO */ comment.
+
+${cfg.supportsWebSearch
+  ? 'Use the web_search tool to research the brand thoroughly before generating.'
+  : 'Use your training knowledge of this brand. Be accurate for well-known brands.'}`;
+
+  const USER=`Target: ${url}\n\nScaffold:\n${scaffoldCSS}\n\nOutput ONLY the completed raw CSS file.`;
+
+  try {
+    setStep('read','active'); await tick();
+    setStep('read','done'); setStep('search','active');
+
+    let msgs=[{role:'user',content:USER}];
+    let data=await cfg.call(apiKey,SYS,msgs);
+
+    const seq=['css','fonts','header','buttons'];
+    let iter=0;
+    while(data.stop_reason==='tool_use'&&iter<8) {
+      const sk=seq[Math.min(iter,seq.length-1)];
+      if(iter===0){setStep('search','done');setStep('css','active');}
+      else{setStep(seq[iter-1],'done');setStep(sk,'active');}
+      msgs.push({role:'assistant',content:data.content});
+      const results=data.content.filter(b=>b.type==='tool_use').map(b=>({type:'tool_result',tool_use_id:b.id,content:'Search completed.'}));
+      msgs.push({role:'user',content:results});
+      data=await cfg.call(apiKey,SYS,msgs);
+      iter++;
+    }
+
+    ['search','css','fonts','header','buttons'].forEach(k=>setStep(k,'done'));
+    setStep('gen','active');
+
+    let text=data.content.filter(b=>b.type==='text').map(b=>b.text).join('');
+    text=text.replace(/^```(?:css)?\n?/gm,'').replace(/^```\s*$/gm,'').trim();
+
+    const fnMatch=text.match(/\/\*\s*filename:\s*([\w.-]+\.css)\s*\*\//);
+    outputFn=fnMatch?fnMatch[1]:deriveFn(url);
+    outputCSS=text.replace(/^\/\*\s*filename:.*?\*\/\n?/,'').trim();
+
+    outFnEl.textContent=outputFn;
+    setStep('gen','done');
+    cssOut.innerHTML=highlight(outputCSS);
+    copyBtn.disabled=false; dlBtn.disabled=false; resetBtn.style.display='';
+    toast('Theme extracted ✓','ok');
+
+  } catch(err) {
+    setStep('gen','error');
+    Object.values(ss).forEach(el=>{ if(el.classList.contains('active')) el.className='step error'; });
+    extractError.textContent=err.message||'Extraction failed.';
+    extractError.classList.remove('hidden');
+    ph.classList.remove('hidden'); outWrap.classList.add('hidden');
+  } finally {
+    extractBtn.disabled=false;
+    extractBtn.disabled=!urlInput.value.trim();
+  }
+}
+
+const tick=()=>new Promise(r=>setTimeout(r,60));
+function deriveFn(url){ try{ const b=new URL(url.startsWith('http')?url:'https://'+url).hostname.replace('www.','').split('.')[0]; return `theme-${b}.css`; }catch{ return 'theme-sample.css'; } }
+
+copyBtn.addEventListener('click',()=>{ if(!outputCSS) return; navigator.clipboard.writeText(outputCSS).then(()=>toast('Copied','ok')); });
+dlBtn.addEventListener('click',()=>{
+  if(!outputCSS||!outputFn) return;
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([outputCSS],{type:'text/css'})); a.download=outputFn; a.click(); URL.revokeObjectURL(a.href);
+  toast(`Downloaded ${outputFn}`,'ok');
+});
+
+function highlight(css){
+  return css.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/(\/\*[\s\S]*?\*\/)/g,'<span class="cc">$1</span>')
+    .replace(/(@import\s+[^;]+;)/g,'<span class="ci">$1</span>')
+    .replace(/(@[\w-]+)(\s)/g,'<span class="ca">$1</span>$2')
+    .replace(/(#[0-9a-fA-F]{3,8})(?=[;\s,)\/])/g,'<span class="ch">$1</span>')
+    .replace(/(rgba?\([^)]+\))/g,'<span class="cr">$1</span>')
+    .replace(/(--[\w-]+)(\s*:)/g,'<span class="cp">$1</span>$2')
+    .replace(/("(?:[^"\\]|\\.)*")/g,'<span class="cs">$1</span>');
+}
+
+function toast(msg,type='ok'){
+  const t=document.createElement('div'); t.className=`toast ${type}`; t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>{ t.style.opacity='0'; setTimeout(()=>t.remove(),300); },2400);
+}
+
+// Boot
+selectProvider(provider);
+if(apiKey){ keyInput.value=apiKey; goToApp(); }
+</script>
+</body>
+</html>

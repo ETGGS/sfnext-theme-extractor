@@ -115,7 +115,39 @@ pre{font-family:'JetBrains Mono','Fira Code','Courier New',monospace;font-size:1
 .toast{position:fixed;bottom:1.25rem;right:1.25rem;padding:9px 15px;border-radius:var(--r);font-size:13px;font-weight:500;z-index:100;animation:toastin .2s ease;transition:opacity .3s;pointer-events:none;}
 .toast.ok{background:var(--green-dim);border:1px solid var(--green-border);color:var(--green);}
 .toast.err{background:var(--red-dim);border:1px solid var(--red-border);color:var(--red);}
+.toast.warn{background:var(--orange-dim);border:1px solid var(--orange-border);color:var(--orange);}
 @keyframes toastin{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+/* ── Tabs ── */
+.tab-bar{display:flex;gap:0;border-bottom:1px solid var(--border);flex-shrink:0;padding:0 1.25rem;}
+.tab-btn{background:none;border:none;border-bottom:2px solid transparent;color:var(--text3);cursor:pointer;font-size:12px;font-weight:500;font-family:inherit;padding:10px 14px;transition:all .15s;margin-bottom:-1px;}
+.tab-btn:hover{color:var(--text2);}
+.tab-btn.active{border-bottom-color:var(--accent);color:var(--accent);}
+.tab-pane{display:none;flex:1;overflow:hidden;flex-direction:column;}
+.tab-pane.active{display:flex;}
+
+/* ── Assets panel ── */
+.assets-area{flex:1;overflow-y:auto;padding:1.25rem;display:flex;flex-direction:column;gap:1.5rem;}
+.asset-section{display:flex;flex-direction:column;gap:.75rem;}
+.asset-section-title{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);}
+.asset-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);overflow:hidden;}
+.asset-card-body{padding:10px 12px;display:flex;flex-direction:column;gap:4px;}
+.asset-card-label{font-size:11px;font-weight:600;color:var(--text2);}
+.asset-card-url{font-size:10px;color:var(--text3);font-family:monospace;word-break:break-all;line-height:1.5;}
+.asset-card-url a{color:var(--blue);text-decoration:none;}
+.asset-card-url a:hover{text-decoration:underline;}
+.asset-preview{width:100%;max-height:120px;object-fit:contain;background:repeating-conic-gradient(#1a1a1a 0% 25%,#222 0% 50%) 0 0/16px 16px;display:block;}
+.asset-preview-bg{width:100%;height:80px;background-size:cover;background-position:center;display:block;}
+.font-card{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r);padding:10px 12px;display:flex;flex-direction:column;gap:6px;}
+.font-name{font-size:15px;font-weight:600;color:var(--text);}
+.font-meta{font-size:11px;color:var(--text3);display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.font-link{font-size:10px;padding:2px 8px;background:var(--blue-dim);border:1px solid var(--blue-border);color:var(--blue);border-radius:4px;text-decoration:none;}
+.font-link:hover{background:rgba(96,165,250,0.15);}
+.assets-ph{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--text3);flex:1;}
+.assets-ph svg{opacity:.2;}.assets-ph p{font-size:13px;}
+.asset-copy-btn{font-size:10px;padding:2px 7px;cursor:pointer;background:var(--surface2);border:1px solid var(--border2);color:var(--text2);border-radius:4px;transition:all .1s;margin-top:2px;width:fit-content;}
+.asset-copy-btn:hover{background:var(--surface3);color:var(--text);}
+
 @media(max-width:700px){
   .app-layout{grid-template-columns:1fr;grid-template-rows:auto 1fr;}
   #screen-app{height:auto;overflow:visible;}
@@ -132,6 +164,7 @@ pre{font-family:'JetBrains Mono','Fira Code','Courier New',monospace;font-size:1
       <span id="key-provider-badge" class="tag"></span>
       <span id="key-masked"></span>
       <button class="btn btn-ghost" id="change-key-btn" style="font-size:11px;padding:4px 10px;">Change key</button>
+      <button class="btn btn-ghost" id="clear-session-btn" style="font-size:11px;padding:4px 10px;color:var(--red);border-color:var(--red-border);" title="Clears the stored key from this session">Clear &amp; logout</button>
     </div>
   </div>
 </header>
@@ -201,7 +234,11 @@ pre{font-family:'JetBrains Mono','Fira Code','Courier New',monospace;font-size:1
       <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
       Validate &amp; Continue
     </button>
-    <p class="privacy-note">Key saved in <code>localStorage</code> — clears when you clear browser data.</p>
+    <p class="privacy-note">
+  Your key is <strong style="color:var(--text2);">AES-256 encrypted</strong> in sessionStorage using WebCrypto —
+  the encryption key exists only in memory and is gone when you close this tab.
+  Auto-logout after <strong style="color:var(--text2);">30 min</strong> of inactivity.
+</p>
   </div>
 </div>
 
@@ -237,6 +274,7 @@ pre{font-family:'JetBrains Mono','Fira Code','Courier New',monospace;font-size:1
           <div class="step" id="s-header"><div class="step-dot"></div>Analysing header / nav / footer</div>
           <div class="step" id="s-buttons"><div class="step-dot"></div>Inspecting CTA buttons</div>
           <div class="step" id="s-gen"><div class="step-dot"></div>Generating theme file</div>
+          <div class="step" id="s-assets"><div class="step-dot"></div>Extracting assets &amp; fonts</div>
         </div>
       </div>
       <hr class="divider">
@@ -260,13 +298,32 @@ pre{font-family:'JetBrains Mono','Fira Code','Courier New',monospace;font-size:1
           <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>New
         </button>
       </div>
-      <div class="output-area">
-        <div class="ph" id="ph">
-          <svg width="44" height="44" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-          <p>Enter a URL and click Extract Theme</p>
+      <!-- Tab bar -->
+      <div class="tab-bar">
+        <button class="tab-btn active" id="tab-css-btn">CSS Theme</button>
+        <button class="tab-btn" id="tab-assets-btn">
+          Assets &amp; Fonts <span id="assets-count" style="display:none;font-size:9px;padding:1px 5px;background:var(--accent-dim);border:1px solid var(--accent-border);color:var(--accent);border-radius:10px;margin-left:4px;"></span>
+        </button>
+      </div>
+      <!-- CSS tab -->
+      <div class="tab-pane active" id="tab-css">
+        <div class="output-area">
+          <div class="ph" id="ph">
+            <svg width="44" height="44" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
+            <p>Enter a URL and click Extract Theme</p>
+          </div>
+          <div class="output-code hidden" id="out-wrap">
+            <pre id="css-out"></pre>
+          </div>
         </div>
-        <div class="output-code hidden" id="out-wrap">
-          <pre id="css-out"></pre>
+      </div>
+      <!-- Assets tab -->
+      <div class="tab-pane" id="tab-assets">
+        <div class="assets-area" id="assets-area">
+          <div class="assets-ph" id="assets-ph">
+            <svg width="44" height="44" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            <p>Assets will appear here after extraction</p>
+          </div>
         </div>
       </div>
     </div>
@@ -473,6 +530,7 @@ const PROVIDERS = {
     hint:'Get a free key at <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a> — no credit card needed',
     supportsWebSearch: false,
     validate: async (key) => {
+      // NOTE: Gemini API requires the key as a URL parameter (their API design — cannot use headers)
       const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,{
         method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({contents:[{parts:[{text:'hi'}]}]})
@@ -485,6 +543,7 @@ const PROVIDERS = {
         role:m.role==='assistant'?'model':'user',
         parts:[{text:typeof m.content==='string'?m.content:(m.content.filter(b=>b.type==='text').map(b=>b.text).join('\n')||'ok')}]
       }));
+      // NOTE: Gemini API requires the key as a URL parameter (their API design — cannot use headers)
       const r = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`,{
         method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({system_instruction:{parts:[{text:sys}]},contents,generationConfig:{maxOutputTokens:4096,temperature:0.1}})
@@ -499,9 +558,103 @@ const PROVIDERS = {
 };
 
 // ── STATE ────────────────────────────────────────────────────────────────────
-const SK='sfnext_key', SP='sfnext_prov';
-let provider=localStorage.getItem(SP)||'anthropic';
-let apiKey=localStorage.getItem(SK)||'';
+// ══════════════════════════════════════════════════════════════════════════════
+// SECURITY MODULE
+// Keys are encrypted with AES-GCM (WebCrypto) before sessionStorage.
+// The encryption key is derived from a random session secret held ONLY in
+// memory (never persisted). This means:
+//   - sessionStorage contains only ciphertext — useless without the session
+//   - Memory-only secret is gone when the tab closes
+//   - Even if an extension reads sessionStorage it gets unreadable bytes
+//   - XSS can only steal the key if it runs IN THIS SESSION (same risk as any BYOK app)
+// ══════════════════════════════════════════════════════════════════════════════
+const _SEC = (() => {
+  // Session-scoped encryption key — generated once per tab, never persisted
+  let _sessionCryptoKey = null;
+  let _sessionSalt = null;
+
+  async function _getOrCreateKey() {
+    if (_sessionCryptoKey) return _sessionCryptoKey;
+    // Generate a random session key (AES-GCM 256-bit)
+    _sessionCryptoKey = await crypto.subtle.generateKey(
+      { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
+    );
+    return _sessionCryptoKey;
+  }
+
+  async function encrypt(plaintext) {
+    const key = await _getOrCreateKey();
+    const iv = crypto.getRandomValues(new Uint8Array(12)); // 96-bit IV
+    const encoded = new TextEncoder().encode(plaintext);
+    const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
+    // Store iv + ciphertext as base64
+    const combined = new Uint8Array(iv.length + ciphertext.byteLength);
+    combined.set(iv, 0);
+    combined.set(new Uint8Array(ciphertext), iv.length);
+    return btoa(String.fromCharCode(...combined));
+  }
+
+  async function decrypt(b64) {
+    try {
+      const key = await _getOrCreateKey();
+      const combined = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+      const iv = combined.slice(0, 12);
+      const ciphertext = combined.slice(12);
+      const plaintext = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
+      return new TextDecoder().decode(plaintext);
+    } catch { return null; }
+  }
+
+  return { encrypt, decrypt };
+})();
+
+// Secure store helpers — always use these, never touch sessionStorage directly
+async function secureStore(key, value) {
+  const enc = await _SEC.encrypt(value);
+  sessionStorage.setItem(key, enc);
+}
+async function secureRead(key) {
+  const enc = sessionStorage.getItem(key);
+  if (!enc) return null;
+  return await _SEC.decrypt(enc);
+}
+function secureClear() {
+  sessionStorage.clear();
+}
+
+// ── Session timeout (30 min inactivity auto-clears key) ───────────────────────
+const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes
+let _sessionTimer = null;
+function _resetSessionTimer() {
+  if (_sessionTimer) clearTimeout(_sessionTimer);
+  _sessionTimer = setTimeout(() => {
+    secureClear();
+    apiKey = '';
+    // Return to key screen silently
+    screenApp.style.display = 'none';
+    screenKey.style.display = 'flex';
+    keyStatusBar.classList.add('hidden');
+    keyInput.value = '';
+    showToastGlobal('Session expired — please re-enter your API key', 'warn');
+  }, SESSION_TIMEOUT_MS);
+}
+// Reset timer on any user interaction
+['click','keydown','mousemove','touchstart'].forEach(ev =>
+  document.addEventListener(ev, _resetSessionTimer, { passive: true })
+);
+
+// KEY FORMAT VALIDATORS (client-side pre-check before any network call)
+const KEY_VALIDATORS = {
+  anthropic: k => /^sk-ant-[a-zA-Z0-9_-]{20,}$/.test(k),
+  openai:    k => /^sk-[a-zA-Z0-9_-]{20,}$/.test(k),
+  mistral:   k => /^[a-zA-Z0-9]{20,}$/.test(k),
+  gemini:    k => /^AIza[a-zA-Z0-9_-]{20,}$/.test(k),
+};
+
+const SK='sfnext_key_enc', SP='sfnext_prov'; // SK stores AES-GCM encrypted key in sessionStorage
+let assetData = null; // {logos:[], backgrounds:[], fonts:[]}
+let provider=sessionStorage.getItem(SP)||'anthropic';
+let apiKey=sessionStorage.getItem(SK)||'';
 let scaffoldCSS=DEFAULT_SCAFFOLD;
 let outputCSS=null, outputFn=null;
 
@@ -519,7 +672,7 @@ const extractBtn=$('extract-btn'), extractError=$('extract-error');
 const copyBtn=$('copy-btn'), dlBtn=$('dl-btn'), resetBtn=$('reset-btn');
 const outFnEl=$('out-fn'), ph=$('ph'), outWrap=$('out-wrap'), cssOut=$('css-out');
 const proxyNote=$('anthropic-proxy-note');
-const ss={read:$('s-read'),search:$('s-search'),css:$('s-css'),fonts:$('s-fonts'),header:$('s-header'),buttons:$('s-buttons'),gen:$('s-gen')};
+const ss={read:$('s-read'),search:$('s-search'),css:$('s-css'),fonts:$('s-fonts'),header:$('s-header'),buttons:$('s-buttons'),gen:$('s-gen'),assets:$('s-assets')};
 
 // ── SCREEN 1 ─────────────────────────────────────────────────────────────────
 function selectProvider(p) {
@@ -553,13 +706,19 @@ keyValidBtn.addEventListener('click', doValidate);
 async function doValidate() {
   const key=keyInput.value.trim(); if(!key) return;
   keyError.classList.add('hidden');
+  // Client-side format check before any network call
+  if(KEY_VALIDATORS[provider] && !KEY_VALIDATORS[provider](key)){
+    keyError.textContent='Key format looks wrong for '+PROVIDERS[provider].label+'. Please double-check it.';
+    keyError.classList.remove('hidden');
+    return;
+  }
   validating.classList.remove('hidden');
   keyValidBtn.disabled=true;
   keyValidBtn.textContent='Validating…';
   try {
     await PROVIDERS[provider].validate(key);
     apiKey=key;
-    localStorage.setItem(SK,key); localStorage.setItem(SP,provider);
+    await secureStore(SK,key); sessionStorage.setItem(SP,provider);
     goToApp();
   } catch(err) {
     keyError.textContent=err.message; keyError.classList.remove('hidden');
@@ -585,6 +744,31 @@ changeKeyBtn.addEventListener('click',()=>{
   selectProvider(provider);
 });
 
+document.getElementById('clear-session-btn').addEventListener('click',()=>{
+  apiKey='';
+  secureClear();
+  screenApp.style.display='none'; screenKey.style.display='flex';
+  keyStatusBar.classList.add('hidden');
+  keyInput.value=''; updateValidateBtn(); keyError.classList.add('hidden');
+  selectProvider(provider);
+  showToastGlobal('Session cleared — key removed from memory','ok');
+});
+
+// ── TABS ─────────────────────────────────────────────────────────────────────
+const tabCssBtn=$('tab-css-btn'), tabAssetsBtn=$('tab-assets-btn');
+const tabCss=$('tab-css'), tabAssets=$('tab-assets');
+function switchTab(tab){
+  if(tab==='css'){
+    tabCssBtn.classList.add('active'); tabAssetsBtn.classList.remove('active');
+    tabCss.classList.add('active'); tabAssets.classList.remove('active');
+  } else {
+    tabAssetsBtn.classList.add('active'); tabCssBtn.classList.remove('active');
+    tabAssets.classList.add('active'); tabCss.classList.remove('active');
+  }
+}
+tabCssBtn.addEventListener('click',()=>switchTab('css'));
+tabAssetsBtn.addEventListener('click',()=>switchTab('assets'));
+
 // ── SCREEN 2 ─────────────────────────────────────────────────────────────────
 urlInput.addEventListener('input',()=>{ extractBtn.disabled=!urlInput.value.trim(); });
 urlInput.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!extractBtn.disabled) runExtraction(); });
@@ -606,10 +790,12 @@ function setStep(k,s){ if(ss[k]) ss[k].className='step '+s; }
 
 extractBtn.addEventListener('click', runExtraction);
 resetBtn.addEventListener('click',()=>{
-  outputCSS=null; outputFn=null; cssOut.innerHTML='';
+  outputCSS=null; outputFn=null; assetData=null; cssOut.innerHTML='';
   outWrap.classList.add('hidden'); ph.classList.remove('hidden');
   outFnEl.textContent='—'; copyBtn.disabled=true; dlBtn.disabled=true;
   resetBtn.style.display='none'; resetSteps(); extractError.classList.add('hidden');
+  renderAssets(null); switchTab('css');
+  const ac=$('assets-count'); if(ac){ac.style.display='none'; ac.textContent='';}
 });
 
 async function runExtraction() {
@@ -644,10 +830,14 @@ SECTION ORDER (preserve exactly)
 EXTRACTION TARGETS
 Fonts, page bg/fg, card/popover, primary/secondary/muted/accent, borders, inputs, ring, complete header tokens, footer, brand palette, logo heights, CTA button shape+colours, search bar if distinct.
 For uncertain values keep the scaffold default and add a /* TODO */ comment.
+STRICT OUTPUT RULES:
+- Every line inside :root must be a valid CSS custom property or a CSS comment. Never write bare text inside CSS blocks.
+- Never invent font names. Only use fonts loadable via Google Fonts or system fonts. If unsure, use the closest system stack and add a TODO comment.
+- Never leak internal notes as raw CSS text. All notes go inside CSS comments.
 
 ${cfg.supportsWebSearch
   ? 'Use the web_search tool to research the brand thoroughly before generating.'
-  : 'Use your training knowledge of this brand. Be accurate for well-known brands.'}`;
+  : 'Use your training knowledge of this brand. Be accurate for well-known brands. Never write bare text inside CSS blocks.'}`;
 
   const USER=`Target: ${url}\n\nScaffold:\n${scaffoldCSS}\n\nOutput ONLY the completed raw CSS file.`;
 
@@ -685,7 +875,21 @@ ${cfg.supportsWebSearch
     setStep('gen','done');
     cssOut.innerHTML=highlight(outputCSS);
     copyBtn.disabled=false; dlBtn.disabled=false; resetBtn.style.display='';
-    toast('Theme extracted ✓','ok');
+
+    // ── Asset extraction (runs after CSS, non-blocking on failure) ────────
+    setStep('assets','active');
+    try {
+      assetData = await extractAssets(url, cfg, apiKey);
+      renderAssets(assetData);
+      const total = (assetData.logos||[]).length + (assetData.backgrounds||[]).length + (assetData.fonts||[]).length;
+      const ac=$('assets-count');
+      if(ac && total>0){ ac.textContent=total; ac.style.display='inline'; }
+      setStep('assets','done');
+      toast('Theme + assets extracted ✓','ok');
+    } catch(ae) {
+      setStep('assets','error');
+      toast('CSS done — assets extraction failed: '+ae.message,'err');
+    }
 
   } catch(err) {
     setStep('gen','error');
@@ -709,15 +913,181 @@ dlBtn.addEventListener('click',()=>{
   toast(`Downloaded ${outputFn}`,'ok');
 });
 
+// ── Asset extraction ─────────────────────────────────────────────────────────
+async function extractAssets(url, cfg, key) {
+  const ASSET_SYS = `You are a brand asset extraction specialist.
+Given a brand website URL, extract all publicly visible brand assets.
+
+OUTPUT FORMAT: Respond ONLY with a valid JSON object, no markdown fences, no prose.
+Schema:
+{
+  "logos": [
+    {"label": "Primary logo", "url": "https://...", "format": "svg|png|webp", "usage": "header|footer|favicon"}
+  ],
+  "backgrounds": [
+    {"label": "Hero background", "url": "https://...", "format": "jpg|webp|png", "usage": "homepage hero|category banner|etc"}
+  ],
+  "fonts": [
+    {"name": "Font Name", "role": "primary|secondary|mono", "source": "Google Fonts|Adobe Fonts|Custom|System", "googleFontsUrl": "https://fonts.google.com/specimen/..." }
+  ]
+}
+
+RULES:
+- Only include assets that are real, publicly accessible URLs from the brand's own domain or CDN.
+- Do not invent or hallucinate any URLs.
+- If you cannot find a real URL for an asset, omit it entirely — never guess.
+- For fonts: only include confirmed font names. If font is proprietary/custom, set source to "Custom" and omit googleFontsUrl.
+- For logos: prefer SVG over PNG. Include favicon if found.
+- For backgrounds: only include key brand background images (hero, banners) — not decorative patterns.
+- Maximum: 3 logos, 4 backgrounds, 4 fonts.
+- If nothing is found for a category, return an empty array for that key.`;
+
+  const ASSET_USER = `Extract brand assets for: ${url}
+${cfg.supportsWebSearch ? 'Use web_search to find real asset URLs from the brand website.' : 'Use your training knowledge to identify this brand assets. Only include assets you are confident exist.'}
+Return ONLY the JSON object.`;
+
+  let msgs = [{role:'user', content:ASSET_USER}];
+  let data = await cfg.call(key, ASSET_SYS, msgs);
+
+  // Handle tool use loop (Anthropic web search)
+  let iter = 0;
+  while(data.stop_reason==='tool_use' && iter<5){
+    msgs.push({role:'assistant',content:data.content});
+    const results = data.content.filter(b=>b.type==='tool_use')
+      .map(b=>({type:'tool_result',tool_use_id:b.id,content:'Search completed.'}));
+    msgs.push({role:'user',content:results});
+    data = await cfg.call(key, ASSET_SYS, msgs);
+    iter++;
+  }
+
+  let text = data.content.filter(b=>b.type==='text').map(b=>b.text).join('');
+  // Strip markdown fences if any
+  text = text.replace(/^```[a-z]*/gm,'').replace(/^```$/gm,'').trim();
+  // Extract JSON object
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if(!jsonMatch) throw new Error('No JSON returned from asset extraction');
+  const parsed = JSON.parse(jsonMatch[0]);
+  return {
+    logos:       Array.isArray(parsed.logos)       ? parsed.logos       : [],
+    backgrounds: Array.isArray(parsed.backgrounds) ? parsed.backgrounds : [],
+    fonts:       Array.isArray(parsed.fonts)       ? parsed.fonts       : []
+  };
+}
+
+// ── Render assets panel ───────────────────────────────────────────────────────
+function renderAssets(data) {
+  const area = $('assets-area');
+  const aph  = $('assets-ph');
+  if(!area) return;
+
+  // Clear previous content except placeholder
+  Array.from(area.children).forEach(c=>{ if(c.id!=='assets-ph') c.remove(); });
+
+  if(!data || (!data.logos.length && !data.backgrounds.length && !data.fonts.length)){
+    if(aph) aph.style.display='flex';
+    return;
+  }
+  if(aph) aph.style.display='none';
+
+  function copyToClipboard(text){
+    navigator.clipboard.writeText(text).then(()=>toast('Copied','ok'));
+  }
+
+  // ── Logos ──
+  if(data.logos && data.logos.length){
+    const sec = document.createElement('div');
+    sec.className='asset-section';
+    sec.innerHTML='<div class="asset-section-title">Logos ('+data.logos.length+')</div>';
+    data.logos.forEach(logo=>{
+      const card=document.createElement('div'); card.className='asset-card';
+      const isImg = /\.(svg|png|webp|jpg|jpeg|gif)(\?|$)/i.test(logo.url||'');
+      const isLogoImg=/\.(svg|png|webp|jpg|jpeg|gif)(\?|$)/i.test(logo.url||'');
+      if(isLogoImg&&logo.url){
+        const img=document.createElement('img');
+        img.className='asset-preview'; img.src=logo.url; img.alt=logo.label||'Logo';
+        img.onerror=function(){this.style.display='none';};
+        card.appendChild(img);
+      }
+      const bd=document.createElement('div'); bd.className='asset-card-body';
+      bd.innerHTML='<div class="asset-card-label">'+esc(logo.label||'Logo')+'</div>'+
+        (logo.usage?'<div class="asset-card-url" style="color:var(--text3)">Usage: '+esc(logo.usage)+'</div>':'')+
+        (logo.url?'<div class="asset-card-url"><a href="'+escAttr(logo.url)+'" target="_blank" rel="noopener">'+esc(logo.url)+'</a></div>':'<div class="asset-card-url" style="color:var(--red)">URL not available</div>')+
+        (logo.url?'<button class="asset-copy-btn">Copy URL</button>':'');
+      card.appendChild(bd);
+      if(logo.url){const b=card.querySelector('.asset-copy-btn');if(b){const u=logo.url;b.onclick=function(){navigator.clipboard.writeText(u).then(()=>toast('Copied','ok'));};}}
+      sec.appendChild(card);
+    });
+    area.appendChild(sec);
+  }
+
+  // ── Background images ──
+  if(data.backgrounds && data.backgrounds.length){
+    const sec=document.createElement('div'); sec.className='asset-section';
+    sec.innerHTML='<div class="asset-section-title">Background Images ('+data.backgrounds.length+')</div>';
+    data.backgrounds.forEach(bg=>{
+      const card=document.createElement('div'); card.className='asset-card';
+      if(bg.url){
+        const prev=document.createElement('div');
+        prev.className='asset-preview-bg';
+        prev.style.backgroundImage='url('+bg.url+')';
+        card.appendChild(prev);
+      }
+      const bd=document.createElement('div'); bd.className='asset-card-body';
+      bd.innerHTML='<div class="asset-card-label">'+esc(bg.label||'Background')+'</div>'+
+        (bg.usage?'<div class="asset-card-url" style="color:var(--text3)">Usage: '+esc(bg.usage)+'</div>':'')+
+        (bg.url?'<div class="asset-card-url"><a href="'+escAttr(bg.url)+'" target="_blank" rel="noopener">'+esc(bg.url)+'</a></div>':'<div class="asset-card-url" style="color:var(--red)">URL not available</div>')+
+        (bg.url?'<button class="asset-copy-btn">Copy URL</button>':'');
+      card.appendChild(bd);
+      if(bg.url){const b=card.querySelector('.asset-copy-btn');if(b){const u=bg.url;b.onclick=function(){navigator.clipboard.writeText(u).then(()=>toast('Copied','ok'));};}}
+      sec.appendChild(card);
+    });
+    area.appendChild(sec);
+  }
+
+  // ── Fonts ──
+  if(data.fonts && data.fonts.length){
+    const sec=document.createElement('div'); sec.className='asset-section';
+    sec.innerHTML='<div class="asset-section-title">Fonts ('+data.fonts.length+')</div>';
+    data.fonts.forEach(font=>{
+      const card=document.createElement('div'); card.className='font-card';
+      card.innerHTML='<div class="font-name">'+esc(font.name||'Unknown')+'</div>'+
+        '<div class="font-meta">'+
+        (font.role?'<span>'+esc(font.role)+'</span>':'')+
+        (font.source?'<span style="color:var(--text3)">'+esc(font.source)+'</span>':'')+
+        (font.googleFontsUrl?'<a class="font-link" href="'+escAttr(font.googleFontsUrl)+'" target="_blank" rel="noopener">Google Fonts ↗</a>':'')+
+        '</div>'+
+        (font.name?'<button class="asset-copy-btn">Copy name</button>':'');
+      if(font.name){const b=card.querySelector('.asset-copy-btn');if(b){const n=font.name;b.onclick=function(){navigator.clipboard.writeText(n).then(()=>toast('Copied','ok'));};}}
+      sec.appendChild(card);
+    });
+    area.appendChild(sec);
+  }
+}
+
+// Safe escaping helpers for HTML rendering
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escAttr(s){ return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
 function highlight(css){
-  return css.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/(\/\*[\s\S]*?\*\/)/g,'<span class="cc">$1</span>')
-    .replace(/(@import\s+[^;]+;)/g,'<span class="ci">$1</span>')
-    .replace(/(@[\w-]+)(\s)/g,'<span class="ca">$1</span>$2')
-    .replace(/(#[0-9a-fA-F]{3,8})(?=[;\s,)\/])/g,'<span class="ch">$1</span>')
-    .replace(/(rgba?\([^)]+\))/g,'<span class="cr">$1</span>')
-    .replace(/(--[\w-]+)(\s*:)/g,'<span class="cp">$1</span>$2')
-    .replace(/("(?:[^"\\]|\\.)*")/g,'<span class="cs">$1</span>');
+  var e=function(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");};
+  // Tokenise line by line to avoid cross-token regex corruption
+  return css.split("\n").map(function(line){
+    var el=e(line);
+    // Whole-line comment
+    if(/^\s*\/\*/.test(line)) return '<span class="cc">'+el+'</span>';
+    if(/^\s*\*/.test(line))    return '<span class="cc">'+el+'</span>';
+    // @import line
+    if(/^@import/.test(line))   return '<span class="ci">'+el+'</span>';
+    // Otherwise colour tokens inline
+    el = el
+      .replace(/(&lt;!--.*?--&gt;)/g,'<span class="cc">$1</span>')
+      .replace(/(\/\*.*?\*\/)/g,'<span class="cc">$1</span>')
+      .replace(/(--[\w-]+)(\s*:)/g,'<span class="cp">$1</span>$2')
+      .replace(/(rgba?\([^)]*\))/g,'<span class="cr">$1</span>')
+      .replace(/(#[0-9a-fA-F]{3,8})/g,'<span class="ch">$1</span>')
+      .replace(/^(@[\w-]+)/,'<span class="ca">$1</span>');
+    return el;
+  }).join("\n");
 }
 
 function toast(msg,type='ok'){
@@ -725,10 +1095,45 @@ function toast(msg,type='ok'){
   document.body.appendChild(t);
   setTimeout(()=>{ t.style.opacity='0'; setTimeout(()=>t.remove(),300); },2400);
 }
+const showToastGlobal = toast; // alias for use before full init
 
-// Boot
+// Boot — load encrypted key from sessionStorage asynchronously
 selectProvider(provider);
-if(apiKey){ keyInput.value=apiKey; goToApp(); }
+(async () => {
+  const storedKey = await secureRead(SK);
+  if(storedKey){
+    apiKey = storedKey;
+    keyInput.value = storedKey;
+    goToApp();
+    _resetSessionTimer();
+  }
+})();
 </script>
+
+<footer style="
+  border-top: 1px solid var(--border);
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--bg);
+">
+  <span style="font-size:11px; color:var(--text3);">Designed &amp; Developed by</span>
+  <span style="font-size:11px; font-weight:600; color:var(--text2);">Harish Kumar MP</span>
+  <span style="color:var(--text4); font-size:11px;">·</span>
+  <span style="
+    font-size:10px;
+    font-weight:700;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    background: var(--accent-dim);
+    border: 1px solid var(--accent-border);
+    color: var(--accent);
+    padding: 2px 8px;
+    border-radius: 20px;
+  ">ETG Digital</span>
+</footer>
+
 </body>
 </html>

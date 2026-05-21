@@ -876,7 +876,7 @@ ${cfg.supportsWebSearch
     cssOut.innerHTML=highlight(outputCSS);
     copyBtn.disabled=false; dlBtn.disabled=false; resetBtn.style.display='';
 
-    // ── Asset extraction (runs after CSS, non-blocking on failure) ────────
+    // ── Asset extraction (truly non-blocking — never fails the overall extraction) ──
     setStep('assets','active');
     try {
       assetData = await extractAssets(url, cfg, apiKey);
@@ -884,11 +884,15 @@ ${cfg.supportsWebSearch
       const total = (assetData.logos||[]).length + (assetData.backgrounds||[]).length + (assetData.fonts||[]).length;
       const ac=$('assets-count');
       if(ac && total>0){ ac.textContent=total; ac.style.display='inline'; }
-      setStep('assets','done');
-      toast('Theme + assets extracted ✓','ok');
+      setStep('assets', total>0 ? 'done' : 'done');
+      toast(total>0 ? 'Theme + assets extracted ✓' : 'Theme extracted ✓ (no assets found)','ok');
     } catch(ae) {
-      setStep('assets','error');
-      toast('CSS done — assets extraction failed: '+ae.message,'err');
+      // Asset extraction failure is non-fatal — CSS was already delivered successfully
+      // Show done (not error) so user knows CSS is ready; assets tab will show the reason
+      setStep('assets','done');
+      assetData = { logos:[], backgrounds:[], fonts:[], _error: ae.message };
+      renderAssets(assetData);
+      toast('Theme extracted ✓','ok');
     }
 
   } catch(err) {
@@ -963,10 +967,19 @@ Return ONLY the JSON object.`;
   let text = data.content.filter(b=>b.type==='text').map(b=>b.text).join('');
   // Strip markdown fences if any
   text = text.replace(/^```[a-z]*/gm,'').replace(/^```$/gm,'').trim();
-  // Extract JSON object
+  // Extract JSON object — be resilient to malformed responses
   const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if(!jsonMatch) throw new Error('No JSON returned from asset extraction');
-  const parsed = JSON.parse(jsonMatch[0]);
+  if(!jsonMatch) {
+    // No JSON in response — return empty gracefully rather than throwing
+    return { logos:[], backgrounds:[], fonts:[] };
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(jsonMatch[0]);
+  } catch(e) {
+    // JSON parse failed — return empty gracefully
+    return { logos:[], backgrounds:[], fonts:[] };
+  }
   return {
     logos:       Array.isArray(parsed.logos)       ? parsed.logos       : [],
     backgrounds: Array.isArray(parsed.backgrounds) ? parsed.backgrounds : [],
@@ -984,7 +997,21 @@ function renderAssets(data) {
   Array.from(area.children).forEach(c=>{ if(c.id!=='assets-ph') c.remove(); });
 
   if(!data || (!data.logos.length && !data.backgrounds.length && !data.fonts.length)){
-    if(aph) aph.style.display='flex';
+    if(aph){
+      aph.style.display='flex';
+      const msg = aph.querySelector('p');
+      if(msg){
+        if(data && data._error){
+          msg.textContent = 'Asset extraction encountered an issue: ' + data._error + '. CSS theme was still generated successfully.';
+          msg.style.color = 'var(--orange)';
+          msg.style.fontSize = '12px';
+          msg.style.maxWidth = '360px';
+          msg.style.textAlign = 'center';
+        } else if(data) {
+          msg.textContent = 'No publicly accessible assets found for this brand. CSS theme was generated successfully.';
+        }
+      }
+    }
     return;
   }
   if(aph) aph.style.display='none';
